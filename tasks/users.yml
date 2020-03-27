@@ -3,8 +3,8 @@
 # get user on github
 - name: Ensure authorized_keys for GitHub user accounts are present.
   authorized_key:
-    user: "{{ item.username | default(item) }}"
-    key: "{{ github_url }}/{{ item.username | default(item) }}.keys"
+    user: "{{ item.username }}"
+    key: "{{ github_url }}/{{ item.username }}.keys"
     manage_dir: true
     exclusive: "{{ item.authorized_keys_exclusive | default(users_authorized_keys_exclusive) }}"
   with_items: "{{ users }}"

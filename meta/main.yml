@@ -1,0 +1,33 @@
+---
+galaxy_info:
+  author: Loic Roux
+  company: Fiducial
+  description: assemble and give default config to a basic debian env
+  license: MIT
+  min_ansible_version: 2.7
+  platforms:
+    - name: Ubuntu
+      versions:
+        - xenial
+        - bionic
+    - name: Debian
+      versions:
+        - stretch
+        - buster
+    - name: EL
+      versions:
+        - 7
+    - name: MacOSX
+      versions:
+        - 10.12
+  galaxy_tags:
+    - system
+    - shell
+    - user
+    - zsh
+    - git
+dependencies: []
+# TODO later pass these roles as deps :
+# ssh://git@github.com/pearofducks/ansible-vim.git
+# ssh://git@github.com/viasite-ansible/ansible-role-zsh.git
+# weareinteractive.users
