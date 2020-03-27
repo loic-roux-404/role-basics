@@ -26,3 +26,5 @@
   with_items:
     - { path: '/etc/sysctl.conf', line: "vm.overcommit_memory={{ over_commit_memory }}" }
     - { path: '/etc/systemd/journald.conf', line: "SystemMaxUse={{ system_max_use }}" }
+
+- include_tasks: users.yml
