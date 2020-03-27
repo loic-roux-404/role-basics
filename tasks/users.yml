@@ -6,19 +6,20 @@
     user: "{{ item.username | default(item) }}"
     key: "{{ github_url }}/{{ item.username | default(item) }}.keys"
     manage_dir: true
-    exclusive: "{{ github_users_authorized_keys_exclusive }}"
+    exclusive: "{{ item.authorized_keys_exclusive | default(users_authorized_keys_exclusive) }}"
   with_items: "{{ users }}"
 
 # TODO use vault to get more informations about user (email)
-- name: Fetch user info from github api
+- name: Fetch main user info from github api
   uri:
-    #user: "{{ jenkins.user }}"
-    #password: "{{ jenkins.password }}"
+    username: "{{ item.username }}"
     method: GET
     #force_basic_auth: yes
     url: "{{ github_api }}" # "{{ github_user_token }}"
     return_content: yes
   register: user_info_object
+  with_items: "{{ users }}"
+  when: users is defined
 
 - name: look user infos
   debug:

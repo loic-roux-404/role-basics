@@ -1,8 +1,0 @@
----
-# avoided dependency : https://github.com/geerlingguy/ansible-role-github-users
-
-github_users_authorized_keys_exclusive: true
-
-github_url: https://github.com
-
-github_api: https://api.github.com/users/
