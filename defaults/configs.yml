@@ -1,0 +1,10 @@
+---
+
+# user configs files
+user_inputrc: "{{ home }}/.inputrc"
+root_inputrc: "{{ root_home }}/.inputrc"
+motd: "/etc/motd"
+user_gitconfig: "{{ home }}/.gitconfig"
+# placed in home in all cases
+user_gitignore_global_name: .gitignore_global
+user_gitignore_global: "{{ home }}/{{ user_gitignore_global_name }}"

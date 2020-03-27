@@ -1,7 +1,29 @@
 ---
-# defaults file for secu
-packages: 
-  - dns-utils
-  - ufw
+# user specific
+user: admin
+root_user: root
+root_home: /root
+home: "/home/{{ user }}"
+user_email: "dummy-astico@yopmail.com"
 
-basics_packages: "{{ packages }}" # TODO merge list
+# include user configs like gitconfig...
+include_vars: configs.yml
+
+base_packages: 
+  - wget
+  - zip
+  - unzip
+
+packages:
+  - hello
+
+# motd messages
+motd_message_1: Ansible generated
+motd_message_2: ''
+motd_message_3: ''
+
+# SYSTEM TRICKS
+# system memory options
+over_commit_memory: 1
+# journald
+system_max_use: "100M"

@@ -1,14 +1,28 @@
 ---
-- name: Install ufw packages
+
+### Install basic system packages
+- name: Install basic packages
   apt: 
-    pkg: "{{ packages }}"
+    pkg: "{{ packages + base_packages }}"
     state: present
 
-- name: Allow all access from RFC1918 networks to this host
-  ufw:
-    rule: allow
-    src: '{{ item }}'
-  loop:
-    - '10.0.0.0/8'
-    - '172.16.0.0/12'
-    - '192.168.0.0/16'
+### Convenience
+- name: Configure inputrc | gitconfig | motd 
+  become: yes
+  template: 
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+   - { src: inputrc.j2, dest: "{{ root_inputrc }}" }
+   - { src: inputrc.j2, dest: "{{ user_inputrc }}" }
+   - { src: motd.j2, dest: "{{ motd }}" }
+   - { src: gitconfig.j2, dest: "{{ user_gitconfig }}" }
+   - { src: gitignore_global.j2, dest: "{{ user_gitignore_global }}" }
+
+- name: Others System tricks
+  lineinfile:
+    path: "{{ item.path }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { path: '/etc/sysctl.conf', line: "vm.overcommit_memory={{ over_commit_memory }}" }
+    - { path: '/etc/systemd/journald.conf', line: "SystemMaxUse={{ system_max_use }}" }
