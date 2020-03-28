@@ -1,26 +1,31 @@
 ---
 
-# get user on github
-- name: Ensure authorized_keys for GitHub user accounts are present.
-  authorized_key:
-    user: "{{ item.username }}"
-    key: "{{ github_url }}/{{ item.username }}.keys"
-    manage_dir: true
-    exclusive: "{{ item.authorized_keys_exclusive | default(users_authorized_keys_exclusive) }}"
-  with_items: "{{ users }}"
-
 # TODO use vault to get more informations about user (email)
 - name: Fetch main user info from github api
   uri:
-    username: "{{ item.username }}"
+    #username: "{{ user_item.username }}"
     method: GET
+    headers:
+      token: "{{ user_item.github_user_token }}"
+      Accept: 'application/json'
     #force_basic_auth: yes
-    url: "{{ github_api }}" # "{{ github_user_token }}"
+    url: "{{ github_api }}/{{ user_item.username }}" # "{{ github_user_token }}"
     return_content: yes
   register: user_info_object
-  with_items: "{{ users }}"
-  when: users is defined
+  when: user_item.github_user_token is defined
 
 - name: look user infos
   debug:
     msg: "{{ user_info_object }}"
+
+- name: apply git config to each user
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ user_item.home }}/{{ item.dest }}"
+    owner: "{{ user_item.username }}"
+    mode: '0600'
+  with_items:
+      - { src: gitignore_global , dest: ".gitignore_global" }
+      - { src: gitconfig, dest: ".gitconfig" }
+
+- name: Include zsh config

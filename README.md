@@ -5,11 +5,11 @@ A brief description of the role goes here.
 
 TODO
 ------------
-- firewall ?
-- continue role-basics !!!
+- firewall config
+- Auth github api / add the public key
 - gitconfig aliases (for loop) ?
 - gitignore (for loop) ?
-- giconfig from github user  
+- review all gitconfig from github user
 
 Requirements
 ------------

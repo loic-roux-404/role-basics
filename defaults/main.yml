@@ -15,14 +15,11 @@ motd_message_3: ''
 
 # avoided dependency : https://github.com/geerlingguy/ansible-role-github-users
 # main user config
-user: admin
 root_user: root
 root_home: /root
-home: "/home/{{ user }}"
-user_email: "dummy-astico@yopmail.com"
 
 github_url: https://github.com
-github_api: https://api.github.com/users/
+github_api: https://api.github.com/users
 github_main_user_token : ''
 
 # user configs files

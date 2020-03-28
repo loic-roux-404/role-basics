@@ -26,4 +26,6 @@
 # adding more infos to users after role-users
 - include_tasks: users.yml
   loop: "{{ users }}"
+  loop_control:
+    loop_var: "user_item"
   when: users is defined
