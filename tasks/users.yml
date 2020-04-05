@@ -1,31 +1,63 @@
 ---
+- name: Start configure {{ user_item.username }}"
+  become_user: "{{ user_item.username  }}"
+  block:
+  - name: Fetch main user info from github api
+    uri:
+      url: "{{ github_api }}/user/emails"
+      return_content: yes
+      headers:
+        Authorization: "token {{ user_item.github_user_token }}"
+    register: response_user_emails
+    when: user_item.github_user_token is defined
 
-# TODO use vault to get more informations about user (email)
-- name: Fetch main user info from github api
-  uri:
-    #username: "{{ user_item.username }}"
-    method: GET
-    headers:
-      token: "{{ user_item.github_user_token }}"
-      Accept: 'application/json'
-    #force_basic_auth: yes
-    url: "{{ github_api }}/{{ user_item.username }}" # "{{ github_user_token }}"
-    return_content: yes
-  register: user_info_object
-  when: user_item.github_user_token is defined
+  - name: Create user objects
+    set_fact:
+      key_value: user_emails
+      cacheable: yes
+      user_emails: "{{ response_user_emails.json }}"
+    when: response_user_emails is defined
 
-- name: look user infos
-  debug:
-    msg: "{{ user_info_object }}"
+  - name: apply git config to each user
+    become: yes
+    become_user: "{{ root_user }}"
+    template:
+      src: "{{ item.src }}"
+      dest: "{{ user_item.home }}/{{ item.dest }}"
+      owner:  "{{ user_item.username }}"
+      group:  "{{ user_item.username }}"
+    with_items:
+        - { src: gitconfig.j2, dest: ".gitconfig" }
 
-- name: apply git config to each user
-  template:
-    src: "{{ item.src }}"
-    dest: "{{ user_item.home }}/{{ item.dest }}"
-    owner: "{{ user_item.username }}"
-    mode: '0600'
-  with_items:
-      - { src: gitignore_global , dest: ".gitignore_global" }
-      - { src: gitconfig, dest: ".gitconfig" }
+  - name: Add server public key to github
+    command: "cat {{ user_item.home | default('/home/'+user_item.username ) }}/.ssh/id_rsa.pub"
+    register: user_public_key
 
-- name: Include zsh config
+ # - name: look user infos
+ #   debug:
+ #       msg: "dummy debug"
+
+  - name: Create a public key
+    uri:
+      url: "{{ github_api }}/user/keys"
+      headers:
+        Authorization: "token {{ user_item.github_user_token }}"
+      method: POST
+      body:
+        title: "ansible_{{ user_item.username }}"
+        key: "{{ user_public_key.stdout }}"
+      status_code: 201, 422
+      body_format: json
+
+  - name: ensure zsh config exist if zsh is shared
+    file:
+      path: "{{ user_item.home }}/.zshrc"
+      state: touch
+    become_user: "{{ user_item.username }}"
+    when: zsh_shared == true
+
+  - name: Include zsh config
+    lineinfile:
+      path: "{{ user_item.home }}/.zshrc"
+      line: "source /usr/share/zsh-config/.zshrc"
+    when: zsh_shared == true

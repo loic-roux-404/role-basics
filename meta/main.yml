@@ -26,8 +26,8 @@ galaxy_info:
     - user
     - git
 dependencies:
-  -  weareinteractive.users
-  - name: ansible-role-zsh
-    src: ssh://git@github.com/viasite-ansible/ansible-role-zsh.git
-    version: "v3.2.6"
-    scm: git
+   - weareinteractive.users
+   - name: ansible-role-zsh
+     src: ssh://git@github.com/loic-roux-404/ansible-role-zsh.git
+     version: "master"
+     scm: git

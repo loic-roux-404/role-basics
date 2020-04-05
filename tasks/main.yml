@@ -1,12 +1,23 @@
 ---
+- include_tasks: system.yml
 
-### Install basic system packages
+- name: Remove packages
+  apt: 
+    pkg: "{{ remove_packages }}"
+    state: absent
+    autoremove: yes
+    purge: yes
+
+- include_tasks: timedatectl.yml
+  when: timedatectl_enabled == true
+
 - name: Install basic packages
   apt: 
-    pkg: "{{ packages + base_packages }}"
+    pkg: "{{ base_packages + packages }}"
     state: present
+    update_cache: yes
+    force: yes
 
-### Convenience
 - name: Configure motd 
   become: yes
   template: 
@@ -15,17 +26,26 @@
   with_items:
    - { src: motd.j2, dest: "{{ motd }}" }
 
-- name: System tricks
-  lineinfile:
-    path: "{{ item.path }}"
-    line: "{{ item.line }}"
-  with_items:
-    - { path: '/etc/sysctl.conf', line: "vm.overcommit_memory={{ over_commit_memory }}" }
-    - { path: '/etc/systemd/journald.conf', line: "SystemMaxUse={{ system_max_use }}" }
-
-# adding more infos to users after role-users
 - include_tasks: users.yml
   loop: "{{ users }}"
   loop_control:
     loop_var: "user_item"
   when: users is defined
+
+- name: zsh for root user
+  file:
+    path: "{{ root_home }}/.zshrc"
+    state: touch
+  become: yes
+  when: zsh_shared == true
+
+- name: Include zsh config for root
+  lineinfile:
+    path: "{{ root_home  }}/.zshrc"
+    line: "source /usr/share/zsh-config/.zshrc"
+  when: zsh_shared == true
+
+- name: install python modules
+  pip:
+    name:  "{{ pip_packages | join(' ')}}"
+    state: present

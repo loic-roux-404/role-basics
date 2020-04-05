@@ -1,7 +1,14 @@
-# This is Git's per-user configuration file.
+#jinja2: trim_blocks: "true", lstrip_blocks: "false"
 [user]
-	email = {{ user_info_object.email | default('unknown') }}
-	name = {{ user_info_object.login | default('unknown') }}
+{% if user_emails is not defined %}
+	email = unknown
+{% endif %}
+{% for email in user_emails %}
+{% if email.primary == true %}
+	email = {{ email.email | default('unknown') }}
+{% endif %}
+{% endfor %}
+	name = {{ user_item.username | default('unknown') }}
 [filter "lfs"]
 	smudge = git-lfs smudge -- %f
 	process = git-lfs filter-process

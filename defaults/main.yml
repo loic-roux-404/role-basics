@@ -1,5 +1,4 @@
 ---
-
 base_packages: 
   - wget
   - zip
@@ -8,29 +7,42 @@ base_packages:
 packages:
   - hello
 
+remove_packages:
+  - apache*
+
+pip_packages: []
+
 # motd messages
 motd_message_1: Ansible generated
 motd_message_2: ''
 motd_message_3: ''
 
-# avoided dependency : https://github.com/geerlingguy/ansible-role-github-users
-# main user config
 root_user: root
 root_home: /root
 
 github_url: https://github.com
-github_api: https://api.github.com/users
-github_main_user_token : ''
+github_api: https://api.github.com
 
 # user configs files
-user_inputrc: "{{ home }}/.inputrc"
 motd: "/etc/motd"
-user_gitconfig: "{{ home }}/.gitconfig"
-# placed in home in all cases
-user_gitignore_global: .gitignore_global
 
 # SYSTEM TRICKS
 # system memory options
 over_commit_memory: 1
 # journald
 system_max_use: "100M"
+
+# ntp
+timedatectl_enabled: true
+timedatectl_timezone: Etc/UTC
+timedatectl_set_ntp: true
+# defaults file for ansible-timedatectl
+timedatectl_timeservers: 
+  - '145.238.203.14'
+  - '145.238.203.10'
+
+timedatectl_timeservers_fallback: 
+  - '0.debian.pool.ntp.org'
+  - '1.debian.pool.ntp.org'
+  - '2.debian.pool.ntp.org'
+  - '3.debian.pool.ntp.org'

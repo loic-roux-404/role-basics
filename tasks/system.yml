@@ -1,0 +1,14 @@
+- name: System tricks
+  become: yes
+  lineinfile:
+    path: "{{ item.path }}"
+    line: "{{ item.line }}"
+  with_items:
+    - { path: '/etc/sysctl.conf', line: "vm.overcommit_memory={{ over_commit_memory }}" }
+    - { path: '/etc/systemd/journald.conf', line: "SystemMaxUse={{ system_max_use }}" }
+
+- name: Kernel panic disable
+  sysctl:
+    name: kernel.panic
+    state: absent
+    sysctl_file: /etc/sysctl.conf
