@@ -5,7 +5,7 @@ services:
   - docker
 env:
   global:
-    - role: role-basicss
+    - role: role-basics
   matrix:
     - distribution: Ubuntu
       distribution_version: "18.04"

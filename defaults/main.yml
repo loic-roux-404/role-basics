@@ -34,7 +34,7 @@ system_max_use: "100M"
 
 # ntp
 timedatectl_enabled: true
-timedatectl_timezone: Etc/UTC
+timedatectl_timezone: Europe/Berlin
 timedatectl_set_ntp: true
 # defaults file for ansible-timedatectl
 timedatectl_timeservers: 
