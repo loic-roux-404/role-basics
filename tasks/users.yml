@@ -1,6 +1,6 @@
 ---
-- name: Start configure {{ user_item.username }}"
-  become_user: "{{ user_item.username  }}"
+- name: "Start configure {{ user_item.username }}"
+  become_user: "{{ user_item.username }}"
   block:
   - name: Fetch main user info from github api
     uri:
@@ -9,18 +9,21 @@
       headers:
         Authorization: "token {{ user_item.github_user_token }}"
     register: response_user_emails
-    when: user_item.github_user_token is defined
+    when: user_item.github_user_token | default(false)
+
+  - name: Emails list github
+    debug:
+       msg: "{{ response_user_emails }}"
 
   - name: Create user objects
     set_fact:
       key_value: user_emails
       cacheable: yes
       user_emails: "{{ response_user_emails.json }}"
-    when: response_user_emails is defined
+    when: response_user_emails.status == 200 | d(false)
 
   - name: apply git config to each user
     become: yes
-    become_user: "{{ root_user }}"
     template:
       src: "{{ item.src }}"
       dest: "{{ user_item.home }}/{{ item.dest }}"
@@ -29,13 +32,10 @@
     with_items:
         - { src: gitconfig.j2, dest: ".gitconfig" }
 
-  - name: Add server public key to github
+  - name: cat user public key
     command: "cat {{ user_item.home | default('/home/'+user_item.username ) }}/.ssh/id_rsa.pub"
     register: user_public_key
-
- # - name: look user infos
- #   debug:
- #       msg: "dummy debug"
+    when: user.ssh_key_generate| d(false) == true
 
   - name: Create a public key
     uri:
@@ -48,6 +48,7 @@
         key: "{{ user_public_key.stdout }}"
       status_code: 201, 422
       body_format: json
+    when: user.ssh_key_generate| d(false) == true
 
   - name: ensure zsh config exist if zsh is shared
     file:

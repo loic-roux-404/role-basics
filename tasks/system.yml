@@ -1,3 +1,4 @@
+---
 - name: System tricks
   become: yes
   lineinfile:
@@ -12,3 +13,64 @@
     name: kernel.panic
     state: absent
     sysctl_file: /etc/sysctl.conf
+
+# SSH daemon configuration.
+- name: Configure SSH daemon.
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  with_items:
+    - regexp: '^UseDNS'
+      line: 'UseDNS no'
+    - regexp: '^GSSAPIAuthentication'
+      line: 'GSSAPIAuthentication no'
+
+# SSH user ACL
+- name: Configure SSH users ACL
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    line: "{{ item.user }}@{{ item.ippattern }}"
+    state: present
+  with_items: "{{ ssh_acl_ip|d(false) }}"
+
+# Clock config
+- name: Setup timesync config
+  template:
+    src: timedatectl.conf.j2
+    dest: /etc/systemd/timesyncd.conf
+  notify: restart timesyncd
+  when: ansible_service_mgr == "systemd" and timedatectl_enabled == true
+
+- name: enable ntp
+  command: timedatectl set-ntp true
+  notify: restart timesyncd
+
+- name: set Timezone
+  timezone:
+    name: "{{ timedatectl_timezone }}"
+  when: ansible_service_mgr == "systemd" and timedatectl_enabled == true
+  notify: restart timesyncd
+
+# Reconfigure keyboard
+- name: install keyboard-configuration
+  become: yes
+  apt:
+    name: keyboard-configuration
+    state: present
+  when: ansible_os_family == 'Debian'
+
+- name: write keyboard configration
+  become: yes
+  template:
+    src: keyboards.j2
+    dest: /etc/default/keyboard
+    force: yes
+    owner: root
+    group: root
+    mode: 'u=rw,go=r'
+
+- name: New keyboard configuration persist
+  become: yes
+  command: dpkg-reconfigure keyboard-configuration

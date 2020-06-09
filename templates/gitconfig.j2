@@ -1,13 +1,14 @@
 #jinja2: trim_blocks: "true", lstrip_blocks: "false"
 [user]
-{% if user_emails is not defined %}
+{% if user_emails | default(false) == false %}
 	email = unknown
-{% endif %}
-{% for email in user_emails %}
-{% if email.primary == true %}
+{% else %}
+	{% for email in user_emails %}
+		{% if email.primary == true %}
 	email = {{ email.email | default('unknown') }}
+		{% endif %}
+	{% endfor %}
 {% endif %}
-{% endfor %}
 	name = {{ user_item.username | default('unknown') }}
 [filter "lfs"]
 	smudge = git-lfs smudge -- %f

@@ -1,3 +1,5 @@
 ---
-- name: run Timedatectl
-  command: timedatectl set-ntp true
+- name: restart timesyncd
+  systemd:
+    state: restarted
+    name: systemd-timesyncd

@@ -28,7 +28,8 @@ galaxy_info:
 dependencies:
    - name: role-users 
      src: weareinteractive.users
+     version: 1.15.0
    - name: role-zsh
      src: ssh://git@github.com/loic-roux-404/role-zsh.git
-     version: "env-404"
+     version: env-404
      scm: git

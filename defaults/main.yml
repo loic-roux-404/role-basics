@@ -1,8 +1,9 @@
 ---
-base_packages: 
+base_packages:
   - wget
   - zip
   - unzip
+  - gnupg2
 
 packages:
   - hello
@@ -17,7 +18,6 @@ motd_message_1: Ansible generated
 motd_message_2: ''
 motd_message_3: ''
 
-root_user: root
 root_home: /root
 
 github_url: https://github.com
@@ -27,6 +27,9 @@ github_api: https://api.github.com
 motd: "/etc/motd"
 
 # SYSTEM TRICKS
+ssh_acl_ip:
+  - ippattern: "*"
+    user: root
 # system memory options
 over_commit_memory: 1
 # journald
@@ -37,12 +40,29 @@ timedatectl_enabled: true
 timedatectl_timezone: Europe/Berlin
 timedatectl_set_ntp: true
 # defaults file for ansible-timedatectl
-timedatectl_timeservers: 
+timedatectl_timeservers:
   - '145.238.203.14'
   - '145.238.203.10'
 
-timedatectl_timeservers_fallback: 
+timedatectl_timeservers_fallback:
   - '0.debian.pool.ntp.org'
   - '1.debian.pool.ntp.org'
   - '2.debian.pool.ntp.org'
   - '3.debian.pool.ntp.org'
+
+# keyboard
+keyboard_mac: false
+# The XKB keyboard model name.
+keyboard_model: pc104
+
+# The XKB keyboard layout name.
+keyboard_layout: fr
+
+# The XKB keyboard variant components.
+keyboard_variant: "{% if keyboard_mac != false %}mac{% else %}latin9{% endif %}"
+
+# The XKB keyboard option components.
+keyboard_options: "{% if keyboard_mac != true %}lv3:switch,compose:lwin{% endif %}"
+
+# The behavior of <BackSpace> and <Delete> keys.
+keyboard_backspace: guess
