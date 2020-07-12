@@ -1,4 +1,11 @@
 ---
+- set_fact:
+    has_home: "{{ (user_item.home_create|d(false)) == True }}"
+
+- set_fact:
+    user_home: "{{ user_item.home|d('/home/'+user_item.username ) }}"
+  when: has_home
+
 - name: "Start configure {{ user_item.username }}"
   become_user: "{{ user_item.username }}"
   block:
@@ -20,22 +27,26 @@
       key_value: user_emails
       cacheable: yes
       user_emails: "{{ response_user_emails.json }}"
-    when: response_user_emails.status == 200 | d(false)
+    when: >
+      (response_user_emails.skipped|d(false) != true or
+      response_user_emails.status|d(false) == 200) | d(false)
 
   - name: apply git config to each user
     become: yes
+    become_user: root
     template:
       src: "{{ item.src }}"
-      dest: "{{ user_item.home }}/{{ item.dest }}"
+      dest: "{{ user_home }}/{{ item.dest }}"
       owner:  "{{ user_item.username }}"
       group:  "{{ user_item.username }}"
     with_items:
         - { src: gitconfig.j2, dest: ".gitconfig" }
+    when: user_item.home_create|d(false) == True
 
   - name: cat user public key
-    command: "cat {{ user_item.home | default('/home/'+user_item.username ) }}/.ssh/id_rsa.pub"
+    command: "cat {{ user_home }}/.ssh/id_rsa.pub"
     register: user_public_key
-    when: user.ssh_key_generate| d(false) == true
+    when: (user_item.ssh_key_generate | d(false)) and has_home
 
   - name: Create a public key
     uri:
@@ -48,17 +59,17 @@
         key: "{{ user_public_key.stdout }}"
       status_code: 201, 422
       body_format: json
-    when: user.ssh_key_generate| d(false) == true
+    when: user_item.ssh_key_generate | d(false)
 
   - name: ensure zsh config exist if zsh is shared
     file:
-      path: "{{ user_item.home }}/.zshrc"
+      path: "{{ user_home }}/.zshrc"
       state: touch
     become_user: "{{ user_item.username }}"
-    when: zsh_shared == true
+    when: zsh_shared == true and has_home
 
   - name: Include zsh config
     lineinfile:
-      path: "{{ user_item.home }}/.zshrc"
+      path: "{{ user_home }}/.zshrc"
       line: "source /usr/share/zsh-config/.zshrc"
-    when: zsh_shared == true
+    when: zsh_shared == true and has_home

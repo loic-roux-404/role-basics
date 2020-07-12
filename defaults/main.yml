@@ -12,6 +12,8 @@ remove_packages:
   - apache*
 
 pip_packages: []
+# Node js
+nvm_version: "0.35.3"
 
 # motd messages
 motd_message_1: Ansible generated

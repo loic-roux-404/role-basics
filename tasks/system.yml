@@ -31,7 +31,7 @@
 - name: Configure SSH users ACL
   lineinfile:
     dest: /etc/ssh/sshd_config
-    line: "{{ item.user }}@{{ item.ippattern }}"
+    line: "AllowUsers {{ item.user }}@{{ item.ippattern }}"
     state: present
   with_items: "{{ ssh_acl_ip|d(false) }}"
 
