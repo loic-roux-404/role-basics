@@ -14,7 +14,9 @@
 
 - name: "Start configure {{ user_item.username }}"
   become_user: "{{ user_item.username }}"
-  when: userexist is succeeded
+  when:
+    - userexist is succeeded
+    - user_item.username not in users_no_ssh
   block:
   - name: Fetch main user info from github api
     uri:
@@ -51,7 +53,7 @@
     when: user_item.home_create|d(false) == True
 
   - name: cat user public key
-    tag: [user_github]
+    tags: [user_github]
     command: "cat {{ user_home }}/.ssh/id_rsa.pub"
     register: user_public_key
     when:
@@ -59,7 +61,7 @@
       - has_home
 
   - name: Create a public key
-    tag: [user_github]
+    tags: [user_github]
     uri:
       url: "https://{{ github_api }}/user/keys"
       headers:

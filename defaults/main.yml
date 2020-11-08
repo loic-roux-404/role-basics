@@ -9,6 +9,7 @@
 #     ssh_key_generate: no
 
 users: []
+users_no_ssh: [root]
 base_packages:
   - wget
   - zip
