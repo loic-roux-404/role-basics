@@ -25,13 +25,4 @@ galaxy_info:
     - shell
     - user
     - git
-dependencies:
-   - name: role-users
-     src: weareinteractive.users
-     version: 1.15.0
-     tags: [ 'role-users' ]
-   - name: role-zsh
-     src: ssh://git@github.com/loic-roux-404/role-zsh.git
-     version: master
-     scm: git
-     tags:  [ 'role-zsh' ]
+dependencies: []

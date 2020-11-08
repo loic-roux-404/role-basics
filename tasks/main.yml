@@ -1,52 +1,10 @@
 ---
 - include_tasks: system.yml
-
-- name: Remove packages
-  package:
-    name: "{{ remove_packages }}"
-    state: absent
-    autoremove: yes
-    purge: yes
-
-- name: Install basic packages
-  package:
-    name: "{{ base_packages + packages }}"
-    state: present
-    update_cache: yes
-    force: yes
-  become: yes
-
-- name: Configure motd
-  become: yes
-  template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-  with_items:
-   - { src: motd.j2, dest: "{{ motd }}" }
+  tags: [system]
 
 - include_tasks: users.yml
+  tags: [users-git]
   loop: "{{ users }}"
   loop_control:
     loop_var: "user_item"
   when: users is defined
-
-- name: zsh for root user
-  file:
-    path: "{{ root_home }}/.zshrc"
-    state: touch
-  become: yes
-  when: zsh_shared == true
-
-- name: Include zsh config for root
-  lineinfile:
-    path: "{{ root_home }}/.zshrc"
-    line: "source /usr/share/zsh-config/.zshrc"
-  when: zsh_shared == true
-
-- name: install python modules
-  pip:
-    name:  "{{ pip_packages }}"
-    state: present
-  become: yes
-  become_user: root
-

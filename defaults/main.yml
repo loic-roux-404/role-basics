@@ -1,4 +1,14 @@
 ---
+# Add features to role-users
+# check real vars in https://github.com/weareinteractive/ansible-users/blob/1.17.0/defaults/main.yml
+# users:
+#   - username: foobar              (required)
+#     github_user_token: <token for api>
+#     home_create: yes
+#     home: /path/to/user/home
+#     ssh_key_generate: no
+
+users: []
 base_packages:
   - wget
   - zip
@@ -12,18 +22,14 @@ remove_packages:
   - apache*
 
 pip_packages: []
-# Node js
-nvm_version: "0.35.3"
 
 # motd messages
 motd_message_1: Ansible generated
 motd_message_2: ''
 motd_message_3: ''
 
-root_home: /root
-
-github_url: https://github.com
-github_api: https://api.github.com
+github_url: github.com
+github_api: "api.{{ github_url }}"
 
 # user configs files
 motd: "/etc/motd"
@@ -32,6 +38,7 @@ motd: "/etc/motd"
 ssh_acl_ip:
   - ippattern: "*"
     user: root
+known_hosts_keys: ["{{ github_url }}"]
 # system memory options
 over_commit_memory: 1
 # journald
