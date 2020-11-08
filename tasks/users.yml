@@ -70,7 +70,7 @@
       body:
         title: "ansible_{{ user_item.username }}"
         key: "{{ user_public_key.stdout }}"
-      status_code: 201, 422 # If 301 should be an token error
+      status_code: 201, 422, 301
       body_format: json
     when: user_item.ssh_key_generate | d(false)
 
