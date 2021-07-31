@@ -1,45 +1,17 @@
 ---
-# Add features to role-users
-# check real vars in https://github.com/weareinteractive/ansible-users/blob/1.17.0/defaults/main.yml
-# users:
-#   - username: foobar              (required)
-#     github_user_token: <token for api>
-#     home_create: yes
-#     home: /path/to/user/home
-#     ssh_key_generate: no
 
+# Add features to role-users
+# Compatible with https://github.com/weareinteractive/ansible-users/blob/1.17.0/defaults/main.yml
 users: []
 users_no_ssh: [root]
-base_packages:
-  - wget
-  - zip
-  - unzip
-  - gnupg2
 
-packages:
-  - hello
-
-remove_packages:
-  - apache*
-
-pip_packages: []
-
-# motd messages
-motd_message_1: Ansible generated
-motd_message_2: ''
-motd_message_3: ''
-
-github_url: github.com
-github_api: "api.{{ github_url }}"
-
-# user configs files
-motd: "/etc/motd"
+github_url: https://github.com
+github_api: https://api.github.com
 
 # SYSTEM TRICKS
 ssh_acl_ip:
   - ippattern: "*"
     user: root
-known_hosts_keys: ["{{ github_url }}"]
 # system memory options
 over_commit_memory: 1
 # journald

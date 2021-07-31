@@ -1,7 +1,7 @@
 ---
 
 - name: Check that user exists
-  shell: "grep -q {{ user_item.username }} /etc/passwd"
+  ansible.builtin.shell: "grep -q {{ user_item.username }} /etc/passwd"
   ignore_errors: yes
   register: userexist
 
@@ -13,13 +13,12 @@
   when: has_home
 
 - name: "Start configure {{ user_item.username }}"
-  become_user: "{{ user_item.username }}"
   when:
     - userexist is succeeded
     - user_item.username not in users_no_ssh
   block:
   - name: Fetch main user info from github api
-    uri:
+    ansible.builtin.uri:
       url: "http://{{ github_api }}/user/emails"
       return_content: yes
       headers:
@@ -32,6 +31,7 @@
        msg: "{{ response_user_emails }}"
 
   - name: Create user objects
+    become_user: "{{ user_item.username }}"
     set_fact:
       key_value: user_emails
       cacheable: yes
@@ -41,20 +41,18 @@
       response_user_emails.status|d(false) == 200) | d(false)
 
   - name: apply git config to each user
-    become: yes
-    become_user: root
-    template:
+    ansible.builtin.template:
       src: "{{ item.src }}"
       dest: "{{ user_home }}/{{ item.dest }}"
       owner:  "{{ user_item.username }}"
       group:  "{{ user_item.username }}"
     with_items:
         - { src: gitconfig.j2, dest: ".gitconfig" }
-    when: user_item.home_create|d(false) == True
+    when: user_item.home_create|d(False) == True
 
   - name: cat user public key
     tags: [user_github]
-    command: "cat {{ user_home }}/.ssh/id_rsa.pub"
+    ansible.builtin.command: "cat {{ user_home }}/.ssh/id_rsa.pub"
     register: user_public_key
     when:
       - user_item.ssh_key_generate | d(false)
@@ -62,7 +60,7 @@
 
   - name: Create a public key
     tags: [user_github]
-    uri:
+    ansible.builtin.uri:
       url: "https://{{ github_api }}/user/keys"
       headers:
         Authorization: "token {{ user_item.github_user_token }}"
@@ -75,22 +73,21 @@
     when: user_item.ssh_key_generate | d(false)
 
   - name: Add trusted hosts
-    tags: [known-hosts]
-    known_hosts:
+    ansible.builtin.known_hosts:
       name: "{{ item }}"
       key: "{{ lookup('pipe', 'ssh-keyscan ' + item) }}"
       state: present
     loop: "{{ known_hosts_keys }}"
+    when: has_home
 
   - name: ensure zsh config exist if zsh is shared
-    file:
+    ansible.builtin.file:
       path: "{{ user_home }}/.zshrc"
       state: touch
-    become_user: "{{ user_item.username }}"
     when: zsh_shared == true and has_home
 
   - name: Include zsh config
-    lineinfile:
+    ansible.builtin.lineinfile:
       path: "{{ user_home }}/.zshrc"
       line: "source /usr/share/zsh-config/.zshrc"
     when: zsh_shared == true and has_home

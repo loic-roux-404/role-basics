@@ -8,24 +8,6 @@
     - { path: '/etc/sysctl.conf', line: "vm.overcommit_memory={{ over_commit_memory }}" }
     - { path: '/etc/systemd/journald.conf', line: "SystemMaxUse={{ system_max_use }}" }
 
-- name: Kernel panic disable
-  sysctl:
-    name: kernel.panic
-    state: absent
-    sysctl_file: /etc/sysctl.conf
-
-- name: Configure SSH daemon.
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-    state: present
-  with_items:
-    - regexp: '^UseDNS'
-      line: 'UseDNS no'
-    - regexp: '^GSSAPIAuthentication'
-      line: 'GSSAPIAuthentication no'
-
 - name: Configure SSH users ACL
   lineinfile:
     dest: /etc/ssh/sshd_config
@@ -39,7 +21,6 @@
     dest: /etc/systemd/timesyncd.conf
   notify: restart timesyncd
   when: ansible_service_mgr == "systemd" and timedatectl_enabled == true
-
 
 - name: enable ntp
   command: timedatectl set-ntp true
@@ -69,36 +50,6 @@
     mode: 'u=rw,go=r'
 
 - name: New keyboard configuration persist
-  become: yes
-  command: dpkg-reconfigure keyboard-configuration
-  ignore_errors: yes #TOFIX
-
-- name: Remove packages
-  package:
-    name: "{{ remove_packages }}"
-    state: absent
-    autoremove: yes
-    purge: yes
-
-- name: Install basic packages
-  package:
-    name: "{{ base_packages + packages }}"
-    state: present
-    update_cache: yes
-    force: yes
-  become: yes
-
-- name: install python modules
-  pip:
-    name:  "{{ pip_packages }}"
-    state: present
-  become: yes
-  become_user: root
-
-- name: Configure motd
-  become: yes
-  template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-  with_items:
-   - { src: motd.j2, dest: "{{ motd }}" }
+  systemd:
+    state: restarted
+    name: keyboard-setup
