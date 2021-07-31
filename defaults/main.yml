@@ -1,12 +1,20 @@
 ---
-
+# ==========================
 # Add features to role-users
 # Compatible with https://github.com/weareinteractive/ansible-users/blob/1.17.0/defaults/main.yml
+# users:
+#   - username: foobar              (required)
+#     github_user_token: <token for api>
+#     home_create: yes
+#     home: /path/to/user/home
+#     ssh_key_generate: no
 users: []
 users_no_ssh: [root]
 
 github_url: https://github.com
 github_api: https://api.github.com
+
+known_hosts_keys: ["{{ github_url }}"]
 
 # SYSTEM TRICKS
 ssh_acl_ip:

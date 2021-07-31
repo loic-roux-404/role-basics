@@ -19,7 +19,7 @@
   block:
   - name: Fetch main user info from github api
     ansible.builtin.uri:
-      url: "http://{{ github_api }}/user/emails"
+      url: "{{ github_api }}/user/emails"
       return_content: yes
       headers:
         Authorization: "token {{ user_item.github_user_token }}"
@@ -61,7 +61,7 @@
   - name: Create a public key
     tags: [user_github]
     ansible.builtin.uri:
-      url: "https://{{ github_api }}/user/keys"
+      url: "{{ github_api }}/user/keys"
       headers:
         Authorization: "token {{ user_item.github_user_token }}"
       method: POST
